@@ -198,6 +198,16 @@ class TreePlanner:
                 E.append((i,j,c.uparent))
                 V.append(c.x)
                 q.append((c,j))
+        #what about ghost nodes not attached to tree?
+        """
+        nullnodes = 0
+        for n in self.nodes:
+            if n.x != None:
+                V.append(n.x)
+            else:
+                nullnodes += 1
+        print "Null nodes:",nullnodes
+        """
         return (V,E)
 
 class RRT(TreePlanner):
@@ -349,8 +359,8 @@ class RRT(TreePlanner):
     def prune(self,node):
         """Overload this to add tree pruning.  Return True to prune a node"""
         if self.pruner:
-            if self.pruner(node):
-                print "asking to prune node",node.x
+            #if self.pruner(node):
+            #    print "asking to prune node",node.x
             return self.pruner(node)
         return False
     def pruneTree(self):
@@ -392,10 +402,13 @@ class RRT(TreePlanner):
         #do the lookup
         res = self.nearestNeighbors.nearest(xrand,lambda pt,n:any(f(pt,n) for f in filters))
         if res == None:
-            #print "Uh... pickNode returned None?",xrand
+            print "Uh... pickNode(",xrand,") returned None?"
             #print "Nearest:",self.nearestNeighbors.nearest(xrand)[0]
             return None
         n = res[1]
+        if n.x == None:
+            raise ValueError("Picked a node for expansion without a state, may have been deleted")
+        #print "closest to",xrand,"=",n.x
         return n
     
     def getPath(self,n=None):
@@ -1316,7 +1329,7 @@ class RepeatedEST(ESTWithProjections):
 		#print "   pruned down to",len(self.nodes),"nodes"
 	return False
     def pruneExtension(self,n,u):
-        if self.bestPathCost == None: return False
+        if not self.doprune or self.bestPathCost == None: return False
         if n.c + self.objective.incremental(n.x,u) > self.bestPathCost:
             return True
         return False
