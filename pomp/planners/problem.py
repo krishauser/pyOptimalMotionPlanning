@@ -1,5 +1,6 @@
 from ..spaces.controlspace import *
 from ..spaces.configurationspace import NeighborhoodSubset
+from ..spaces import metric
 import allplanners
 
 class PlanningProblem:
