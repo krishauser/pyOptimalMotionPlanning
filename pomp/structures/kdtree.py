@@ -169,11 +169,11 @@ class KDTree:
         if node.splitvalue == None: return (node,None)
         if self.partitionFn(node.splitdim,node.splitvalue,point) < 0:
             n,p = self._locate_with_parent(node.left,point)
-            if n == node.left: return n,node
+            if p==None: return n,node
             return n,p
         else:
             n,p = self._locate_with_parent(node.right,point)
-            if n == node.right: return n,node
+            if p==None: return n,node
             return n,p
 
 
@@ -192,13 +192,15 @@ class KDTree:
         if len(n.points)==0:
             #merge siblings back up the tree?
             if parent != None:
-                if parent.left == n:
-                    parent.points = parent.right.points
-                    parent.left = parent.right = None
-                else:
-                    parent.points = parent.left.points
-                    parent.left = parent.right = None
-                parent.splitvalue = None
+                if parent.left.splitvalue == None and parent.right.splitvalue == None:
+                    if parent.left == n:
+                        parent.points = parent.right.points
+                        parent.left = parent.right = None
+                    else:
+                        assert parent.right==n
+                        parent.points = parent.left.points
+                        parent.left = parent.right = None
+                    parent.splitvalue = None
         if found:
             return 1
         return 0
