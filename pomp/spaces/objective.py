@@ -1,3 +1,5 @@
+from ..klampt import vectorops
+
 class ObjectiveFunction:
     """Objective function base class.  Measures the cost of a trajectory
     [x0,...,xn],[u1,...,un] or a path [x0,...,xn]"""
