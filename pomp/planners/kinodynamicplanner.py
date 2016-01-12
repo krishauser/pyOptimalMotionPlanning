@@ -14,7 +14,7 @@ rrtNumControlSampleIters = 10
 
 #Set this to something non multiple of 10 because many test obstacles are
 #aligned to a 10x10 grid
-estDefaultResolution = 9
+estDefaultResolution = 13
 #when caching is on, this can be set quite high because only a few extension
 #samples are being drawn per iteration.  Drawback: re-weighting frequency
 #becomes an issue
@@ -30,12 +30,12 @@ estNumExtensionSamples = 50
 #being sampled less frequently
 estUseCachedExtensions = True
 #estUseCachedExtensions = False
-estPrecheckExtensions = False
+estPrecheckExtensions = True
 estCacheReweightFrequency = 10
 estNumCachedExtensionDrops = 2
 #TEST: add a "bonus extension" to cache after a successful extension
 #this might help wiggle into narrow passages
-estLetItRoll = True
+estLetItRoll = False
 estNumLetItRollSamples = 50
 
 
