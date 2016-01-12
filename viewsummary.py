@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import math
 from collections import defaultdict
 
 if len(sys.argv) < 3:
@@ -25,7 +26,7 @@ labelmap = {"lazy_rrgstar":"Lazy-RRG*",
             "rrtstar_subopt_0.2":"LBT-RRT*(0.2)",
 }
 #labelorder = ["restart_rrt_shortcut","prmstar","fmmstar","rrtstar","birrtstar","rrtstar_subopt_0.1","rrtstar_subopt_0.2","lazy_prmstar","lazy_rrgstar","lazy_birrgstar"]
-labelorder = ["ao_rrt","ao_est","repeated_rrt","repeated_est","repeated_rrt_prune","repeated_est_prune"]
+labelorder = ["ao_rrt","ao_est","repeated_rrt","repeated_est","repeated_rrt_prune","repeated_est_prune","stable_sparse_rrt","anytime_rrt","rrtstar"]
 dashes = [[],[8,8],[4,4],[2,2],[1,1],[12,6],[4,2,2,2],[8,2,2,2,2,2],[6,2],[2,6]]
 ylabelmap = {"best cost":"Path length",
              "numEdgeChecks":"# edge checks",
@@ -91,6 +92,8 @@ with open(sys.argv[1],'r') as f:
         ax1.set_xlabel("Time (s)")
     else:
         ax1.set_xlabel("Iterations")
+    minx = 0
+    maxx = 0
     ax1.set_ylabel(ylabelmap.get(item,item))
     for n,label in enumerate(labelorder):
         if label not in items: continue
@@ -98,8 +101,10 @@ with open(sys.argv[1],'r') as f:
         if len(items[label])==0:
             print "Skipping item",label
         x,y = zip(*plot)
+        minx = min(minx,*[v for v in x if v is not None])
+        maxx = max(maxx,*[v for v in x if v is not None])
         plannername = labelmap[label] if label in labelmap else label
-        print plannername
+        print "Plotting",plannername
         line = ax1.plot(x,y,label=plannername,dashes=dashes[n])
         plt.setp(line,linewidth=1.5)
     #plt.legend(loc='upper right');
@@ -122,7 +127,7 @@ with open(sys.argv[1],'r') as f:
         elif sys.argv[1].startswith('bar_25'):
             plt.xlim([0,20])
         else:
-            plt.xlim([0,10])
+            plt.xlim([math.floor(minx),math.ceil(maxx)])
     else:
         plt.xlim([0,5000])
 
