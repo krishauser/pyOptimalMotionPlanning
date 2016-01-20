@@ -14,7 +14,7 @@ rrtNumControlSampleIters = 10
 
 #Set this to something non multiple of 10 because many test obstacles are
 #aligned to a 10x10 grid
-estDefaultResolution = 13
+estDefaultResolution = 7
 #when caching is on, this can be set quite high because only a few extension
 #samples are being drawn per iteration.  Drawback: re-weighting frequency
 #becomes an issue
@@ -479,7 +479,7 @@ class EST(TreePlanner):
         #control sampling method
         global estNumExtensionSamples
         numNodeSamples = min(10+len(self.nodes),estNumExtensionSamples)
-        numControlSamplesPerNode = 3
+        numControlSamplesPerNode = 10
         #numNodeSamples = 1
         #Temp: test some probability of rejection?
         #extensions = [None]
