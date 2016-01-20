@@ -7,6 +7,8 @@ import copy
 import sys
 import os,errno
 
+numTrials = 10
+
 def mkdir_p(path):
     """Quiet path making"""
     try:
@@ -16,12 +18,12 @@ def mkdir_p(path):
             raise
 
 def testPlannerDefault(problem,problemName,maxTime,plannerType,**plannerParams):
-    #checker = EpsilonEdgeChecker(problem.configurationSpace,0.01)
+    global numTrials
     print "Planning with",plannerType,'on problem',problemName
     planner = problem.planner(plannerType,**plannerParams)
     folder = os.path.join("data",problemName)
     mkdir_p(folder)
-    test.testPlanner(planner,10,maxTime,os.path.join(folder,allplanners.filename[plannerType]+'.csv'))
+    test.testPlanner(planner,numTrials,maxTime,os.path.join(folder,allplanners.filename[plannerType]+'.csv'))
 
 
 all_planners = ['ao-est','ao-rrt','r-est','r-est-prune','r-rrt','r-rrt-prune','rrt*','anytime-rrt','stable-sparse-rrt']
@@ -37,12 +39,13 @@ all_problems = {'Kink':geometric.kinkTest(),
                 'Pendulum':pendulum.pendulumTest()}
 
 defaultParameters = {'maxTime':30}
-customParameters = {'Kink':{'maxTime':20,'nextStateSamplingRange':0.15},
-                    'Bugtrap':{'maxTime':20,'nextStateSamplingRange':0.15},
-                    'Pendulum':{'edgeCheckTolerance':0.1,'selectionRadius':.3,'witnessRadius':0.16},
-                    'Flappy':{'maxTime':60,'edgeCheckTolerance':4,'selectionRadius':70,'witnessRadius':35},
-                    'DoubleIntegrator':{'selectionRadius':0.3,'witnessRadius':0.3},
-                    'Dubins':{'selectionRadius':0.25,'witnessRadius':0.2}
+customParameters = {'Kink':{'maxTime':40,'nextStateSamplingRange':0.15},
+                    'Bugtrap':{'maxTime':40,'nextStateSamplingRange':0.15},
+                    'Pendulum':{'maxTime':120,'edgeCheckTolerance':0.1,'selectionRadius':.3,'witnessRadius':0.16},
+                    'Flappy':{'maxTime':120,'edgeCheckTolerance':4,'selectionRadius':70,'witnessRadius':35},
+                    'DoubleIntegrator':{'maxTime':60,'selectionRadius':0.3,'witnessRadius':0.3},
+                    'Dubins':{'selectionRadius':0.25,'witnessRadius':0.2},
+                    'Dubins2':{'selectionRadius':0.25,'witnessRadius':0.2}
                     }
 
 def parseParameters(problem,planner):
