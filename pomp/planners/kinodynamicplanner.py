@@ -14,7 +14,9 @@ rrtNumControlSampleIters = 10
 
 #Set this to something non multiple of 10 because many test obstacles are
 #aligned to a 10x10 grid
-estDefaultResolution = 13
+estDefaultResolution = 7
+#Hierarchical density estimation 
+estHierarchyLevels = 3
 #when caching is on, this can be set quite high because only a few extension
 #samples are being drawn per iteration.  Drawback: re-weighting frequency
 #becomes an issue
@@ -31,11 +33,12 @@ estNumExtensionSamples = 50
 estUseCachedExtensions = True
 #estUseCachedExtensions = False
 estPrecheckExtensions = True
+#estPrecheckExtensions = False
 estCacheReweightFrequency = 10
 estNumCachedExtensionDrops = 2
 #TEST: add a "bonus extension" to cache after a successful extension
 #this might help wiggle into narrow passages
-estLetItRoll = False
+estLetItRoll = True
 estNumLetItRollSamples = 50
 
 
@@ -479,7 +482,7 @@ class EST(TreePlanner):
         #control sampling method
         global estNumExtensionSamples
         numNodeSamples = min(10+len(self.nodes),estNumExtensionSamples)
-        numControlSamplesPerNode = 3
+        numControlSamplesPerNode = 10
         #numNodeSamples = 1
         #Temp: test some probability of rejection?
         #extensions = [None]
@@ -536,7 +539,8 @@ class EST(TreePlanner):
 		    #weights.append(1.0/(1.0+de))
 		    # pick with probability inversely proportional to density squared?
                     weights.append(1.0/(1.0+de**2))
-                    #break on successful extension
+                    #print "density",de
+                    #TEST? break on successful extension?
                     break
                     if len(weights) >= numNodeSamples:
                         break
@@ -547,8 +551,10 @@ class EST(TreePlanner):
             #failed extension
 	    #TODO: penalize this node
 	    return None
+        #print "weights",weights
         i = sample_weighted(weights)
         #i = arg_max(weights)
+        #print "picked node with density",self.density(extensions[i][2].end())
         if extensions[i]==None:
             #this gives some probability to rejecting extensions
 	    #in highly dense regions
@@ -563,7 +569,8 @@ class EST(TreePlanner):
             extensions.pop(-1)
             for k in xrange(estNumCachedExtensionDrops):
                 if len(weights)==0: break
-                i = random.randint(0,len(weights)-1)
+                #i = random.randint(0,len(weights)-1)
+                i = arg_min(weights)
                 weights[i] = weights[-1]
                 extensions[i] = extensions[-1]
                 weights.pop(-1)
@@ -675,6 +682,7 @@ class ESTWithProjections(EST):
         self.projectionBases = []
         self.projectionHashes = []
         self.projectionResolution = popdefault(params,'projectionResolution',estDefaultResolution)
+        self.projectionHierarchyLevels = popdefault(params,'projectionHierarchyLevels',estHierarchyLevels)
         EST.__init__(self,controlSpace,edgeChecker,
                      **params)
     def destroy(self):
@@ -712,7 +720,17 @@ class ESTWithProjections(EST):
                 basis = {i:self.projectionResolution*scale[i]}
                 self.projectionBases[-1].append(basis)
             self.projectionHashes.append(RandomDict())
-        #print "EST using",len(self.projectionBases),"projection bases"
+        #add hierarchy
+        baseCnt = len(self.projectionHashes)
+        for level in range(1,self.projectionHierarchyLevels):
+            for b in range(baseCnt):
+                basis = []
+                for base in self.projectionBases[b]:
+                    scalebasis = dict((i,v*(1+level)) for i,v in base.iteritems())
+                    basis.append(scalebasis)
+                self.projectionBases.append(basis)
+                self.projectionHashes.append(RandomDict())
+        print "EST using",len(self.projectionBases),"projection bases"
         if self.root != None:
             #need to re-add the elements of the tree
             def recursive_add(node):
@@ -742,8 +760,11 @@ class ESTWithProjections(EST):
         return
     def density(self,x):
         #c = 1.0
-        c = float('inf')
-        for basis,bhash in zip(self.projectionBases,self.projectionHashes):
+        #c = float('inf')
+        c = 0.0
+        baselevels = len(self.projectionBases)/self.projectionHierarchyLevels
+        for index,(basis,bhash) in enumerate(zip(self.projectionBases,self.projectionHashes)):
+            blevel = (int(index / baselevels) + 1)
             #sparse dot products
             dp = [0.0]*len(basis)
             for i,basisvector in enumerate(basis):
@@ -755,9 +776,12 @@ class ESTWithProjections(EST):
                     #else:
                     dp[i] += x[k]*v
             index = tuple([int(v) for v in dp])
+            #here we've added to get an average density
+            c += float(len(bhash.get(index,[])))*pow(blevel,len(basisvector))
             #here we've multiplied to get a better sense of density
             #c *= float(len(bhash.get(index,[])))/(len(self.nodes))
-            c = min(c,len(bhash.get(index,[])))
+            #c = min(c,len(bhash.get(index,[])))
+        return c / len(self.projectionBases)
         #account for multiple counting of axes
         #power = (float(len(x))-1)/(3.0*len(self.projectionBases))
         #if len(self.projectionBases) > 1:
