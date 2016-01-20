@@ -98,32 +98,43 @@ def parse_data(csvfn):
             t += dt
         return res
 
-csvfiles = glob.glob(os.path.join(sys.argv[1],"*.csv"))
-data = dict()
-print "Files:"
-for fn in csvfiles:
-    name = os.path.splitext(os.path.basename(fn))[0]
-    if name == 'summary': continue
-    print "  "+name
-    fdata = parse_data(fn)
-    data[name] = fdata
-fn = (sys.argv[2] if len(sys.argv) >= 3 else os.path.join(sys.argv[1],"summary.csv"))
-print "Saving summary statistics to",fn
-with open(fn,'w') as f:
-    headers = []
-    for (name,fdata) in data.iteritems():
-        for (k,v) in fdata.iteritems():
-            headers.append(name+' '+k)
-    writer=csv.DictWriter(f,sorted(headers))
-    writer.writeheader()
-    i = 0
-    while True:
-        item = dict()
+
+def process(folder,outfile=None):
+    csvfiles = glob.glob(os.path.join(folder,"*.csv"))
+    data = dict()
+    print "Files in %s:"%(folder)
+    for fn in csvfiles:
+        name = os.path.splitext(os.path.basename(fn))[0]
+        if name == 'summary': continue
+        print "  "+name
+        fdata = parse_data(fn)
+        data[name] = fdata
+    fn = (outfile if outfile is not None else os.path.join(folder,"summary.csv"))
+    print "Saving summary statistics to",fn
+    with open(fn,'w') as f:
+        headers = []
         for (name,fdata) in data.iteritems():
             for (k,v) in fdata.iteritems():
-                if i < len(v):
-                    item[name+' '+k] = v[i]
-        if len(item)==0: break
-        writer.writerow(item)
-        i+=1
-print "Done."
+                headers.append(name+' '+k)
+        writer=csv.DictWriter(f,sorted(headers))
+        writer.writeheader()
+        i = 0
+        while True:
+            item = dict()
+            for (name,fdata) in data.iteritems():
+                for (k,v) in fdata.iteritems():
+                    if i < len(v):
+                        item[name+' '+k] = v[i]
+            if len(item)==0: break
+            writer.writerow(item)
+            i+=1
+    print "Done."
+
+if sys.argv[1] == 'all':
+    files = glob.glob(os.path.join('data','*'))
+    for f in files:
+        process(f)
+elif len(sys.argv) >= 3:
+    process(sys.argv[1],sys.argv[2])
+else:
+    process(sys.argv[1])
