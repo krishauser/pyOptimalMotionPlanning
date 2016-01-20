@@ -16,6 +16,12 @@ def popdefault(mapping,item,default,warning=True):
             print warning
         return default
 
+def arg_min(weights,args = None):
+    """Returns the index of the list weights which contains the minimum
+    item.  If vals is provided, then this indicates the index"""
+    if args == None: args = range(len(weights))
+    return min(zip(weights,args))[1]
+
 def arg_max(weights,args = None):
     """Returns the index of the list weights which contains the maximum
     item.  If vals is provided, then this indicates the index"""

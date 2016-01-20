@@ -1,4 +1,3 @@
-from pomp.visualizer import runVisualizer
 from pomp.planners import allplanners
 from pomp.planners import test
 from pomp.example_problems import *
@@ -135,6 +134,7 @@ if __name__=="__main__":
         print "  If -v is provided, runs an OpenGL visualization of planning"
         exit(0)
     if sys.argv[1] == '-v':
+        from pomp.visualizer import runVisualizer
         #visualization mode
         print "Testing visualization with problem",sys.argv[2],"and planner",sys.argv[3]
         runViz(sys.argv[2],sys.argv[3])
