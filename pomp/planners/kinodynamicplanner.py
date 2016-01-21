@@ -15,11 +15,8 @@ rrtNumControlSampleIters = 10
 #Set this to something non multiple of 10 because many test obstacles are
 #aligned to a 10x10 grid
 estDefaultResolution = 7
-<<<<<<< HEAD
-=======
 #Hierarchical density estimation 
-estHierarchyLevels = 3
->>>>>>> d264f5c9623433a45f896154f65875fbfd824ed6
+estHierarchyLevels = 2
 #when caching is on, this can be set quite high because only a few extension
 #samples are being drawn per iteration.  Drawback: re-weighting frequency
 #becomes an issue
@@ -713,8 +710,8 @@ class ESTWithProjections(EST):
         except Exception:
             scale = [1]*self.controlSpace.configurationSpace().dimension()
             print "EST projection hash scale",scale,"resolution",self.projectionResolution
-        #now enumerate all size-3 subsets of the indices
-        d = min(len(indices),3)
+        #now enumerate all size-4 subsets of the indices
+        d = min(len(indices),4)
         self.projectionBases = []
         self.projectionHashes = []
         for element in itertools.combinations(indices,d):
@@ -779,11 +776,12 @@ class ESTWithProjections(EST):
                     #else:
                     dp[i] += x[k]*v
             index = tuple([int(v) for v in dp])
+            cnt = len(bhash.get(index,[]))
             #here we've added to get an average density
-            c += float(len(bhash.get(index,[])))*pow(blevel,len(basisvector))
+            c += float(cnt)*pow(blevel,len(basisvector))
             #here we've multiplied to get a better sense of density
-            #c *= float(len(bhash.get(index,[])))/(len(self.nodes))
-            #c = min(c,len(bhash.get(index,[])))
+            #c *= float(cnt)/(len(self.nodes))
+            #c = min(c,cnt)
         return c / len(self.projectionBases)
         #account for multiple counting of axes
         #power = (float(len(x))-1)/(3.0*len(self.projectionBases))
