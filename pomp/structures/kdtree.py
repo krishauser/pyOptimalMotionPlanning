@@ -220,7 +220,7 @@ class KDTree:
             points += node.points
             if node.left: recurse_add_points(node.left)
             if node.right: recurse_add_points(node.right)
-        recurse_add_points(self.node)
+        recurse_add_points(self.root)
         self.set(zip(*points))
         print "Done."
         return True
