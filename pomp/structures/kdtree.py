@@ -129,6 +129,7 @@ class KDTree:
                 if vmax-vmin > rangemax[1]-rangemax[0]:
                     rangemax = (vmin,vmax)
                     dimmax = i
+            node.splitdim = dimmax
             vmin,vmax = rangemax
         if vmin == vmax:
             #all points are equal, no split
