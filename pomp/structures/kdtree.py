@@ -1,7 +1,7 @@
 import math
 from knn import *
-from ..spaces import metric
-from ..klampt import so2
+import metric
+from klampt import so2
 
 #If using a non-Euclidean space, the kd tree should account for
 #it.  Rather than setting the the KDTree partitionFn and minDistance
@@ -132,7 +132,7 @@ class KDTree:
             node.splitdim = dimmax
             vmin,vmax = rangemax
         if vmin == vmax:
-            #all points are equal, no split
+            #all points are equal, don't split (yet)
             return 0
         node.splitvalue = (vmin+vmax)*0.5
         leftpts = []
@@ -140,6 +140,10 @@ class KDTree:
         for p in node.points:
             if self.partitionFn(node.splitdim,node.splitvalue,p[0]) < 0: leftpts.append(p)
             else: rightpts.append(p)
+        if len(leftpts) == 0 or len(rightpts) == 0:
+            #may have numerical error
+            node.splitvalue = None
+            return 0
         node.left = Node(leftpts,(node.splitdim+1)%d)
         node.right = Node(rightpts,(node.splitdim+1)%d)
         node.left.depth = node.depth+1
