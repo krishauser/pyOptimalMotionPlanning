@@ -1,7 +1,7 @@
 import math
 from knn import *
-import metric
-from klampt import so2
+from ..spaces import metric
+from ..klampt import so2
 
 #If using a non-Euclidean space, the kd tree should account for
 #it.  Rather than setting the the KDTree partitionFn and minDistance

@@ -1,5 +1,5 @@
 import math
-from klampt import vectorops
+from ..klampt import vectorops
 
 def euclideanMetric(a,b):
     return vectorops.distance(a,b)
