@@ -1,4 +1,4 @@
-from klampt import vectorops
+from ..klampt import vectorops
 import math
 
 class GeodesicSpace:
