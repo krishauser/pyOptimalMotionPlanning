@@ -6,8 +6,8 @@ major form, and t is a 3-list specifying the translation vector.
 These are useful for interfacing with C code.
 """
 
-import vectorops
-import so3
+from . import vectorops
+from . import so3
 
 def identity():
     """Returns the identity transformation."""

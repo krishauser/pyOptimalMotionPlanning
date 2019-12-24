@@ -51,10 +51,10 @@ class RobotCSpace(AdaptiveCSpace):
 
     def envCollision(self):
         if not self.collider: return False
-        for o in xrange(self.collider.world.numRigidObjects()):
+        for o in range(self.collider.world.numRigidObjects()):
             if any(self.collider.robotObjectCollisions(self.robot.index,o)):
                 return True;
-        for o in xrange(self.collider.world.numTerrains()):
+        for o in range(self.collider.world.numTerrains()):
             if any(self.collider.robotTerrainCollisions(self.robot.index,o)):
                 return True;
         return False

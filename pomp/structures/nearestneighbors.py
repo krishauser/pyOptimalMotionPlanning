@@ -1,5 +1,9 @@
-import kdtree
-from knn import *
+from __future__ import print_function,division
+from six import iteritems
+from builtins import range
+
+from . import kdtree
+from .knn import *
 
 #set this to true if you wish to double-check the results of the kd tree
 check_kdtree = False
@@ -14,7 +18,7 @@ class NearestNeighbors:
             self.kdtree = kdtree.KDTree(self.metric)
             if check_kdtree:
                 self.checker = NearestNeighbors(self.metric)
-                print "Debugging: Double checking KD-tree with nearest neighbors"
+                print("Debugging: Double checking KD-tree with nearest neighbors")
         else:
             self.nodes = []
 
@@ -45,15 +49,16 @@ class NearestNeighbors:
                 if cres != res:
                     raise ValueError("KD-tree did not remove the correct numer of points")
             if res == 0:
-                print "KDTree: Unable to remove",point,"does not exist"
+                print("KDTree: Unable to remove",point,"does not exist")
             return res
         else:
             for i,(p,pd) in enumerate(self.nodes):
                 if p == point and (data == None or pd==data):
                     del self.nodes[i]
                     return 1
+            print("ERROR REMOVING POINT FROM BRUTE-FORCE NN STRUCTURE")
             for p,pd in self.nodes:
-                print p,pd
+                print(p,pd)
         return 0
             
 
@@ -62,11 +67,11 @@ class NearestNeighbors:
         if datas==None:
             datas = [None]*len(points)
         if hasattr(self,'kdtree'):
-            print "Resetting KD tree..."
+            print("Resetting KD tree...")
             self.kdtree.set(points,datas)
             if check_kdtree: self.checker.set(points,datas)
         else:
-            self.nodes = zip(points,datas)
+            self.nodes = list(zip(points,datas))
 
     def nearest(self,pt,filter=None):
         """Nearest neighbor lookup, possibly with filter"""
@@ -75,9 +80,9 @@ class NearestNeighbors:
             if check_kdtree: 
                 rescheck = self.checker.nearest(pt,filter)
                 if res != rescheck:
-                    print "KDTree nearest(",pt,") error",res,"should be",rescheck
-                    print self.metric(res[0],pt)
-                    print self.metric(rescheck[0],pt)
+                    print("KDTree nearest(",pt,") error",res,"should be",rescheck)
+                    print(self.metric(res[0],pt))
+                    print(self.metric(rescheck[0],pt))
             return res
         else:
             #brute force
@@ -97,9 +102,9 @@ class NearestNeighbors:
             if check_kdtree: 
                 rescheck = self.checker.knearest(pt,k,filter)
                 if res != rescheck:
-                    print "KDTree knearest(",pt,") error",res,"should be",rescheck
-                    print self.metric(res[0][0],pt)
-                    print self.metric(rescheck[0][0],pt)
+                    print("KDTree knearest(",pt,") error",res,"should be",rescheck)
+                    print(self.metric(res[0][0],pt))
+                    print(self.metric(rescheck[0][0],pt))
             return res
         else:
             #brute force
@@ -118,11 +123,11 @@ class NearestNeighbors:
             if check_kdtree: 
                 rescheck = self.checker.neighbors(pt,radius)
                 if len(res) != len(rescheck):
-                    print "KDTree neighbors(",pt,",",radius,") error",res,"should be",rescheck
+                    print("KDTree neighbors(",pt,",",radius,") error",res,"should be",rescheck)
                 else:
                     for r in res:
                         if r not in rescheck:
-                            print "KDTree neighbors(",pt,",",radius,") error",res,"should be",rescheck
+                            print("KDTree neighbors(",pt,",",radius,") error",res,"should be",rescheck)
                             break
 
             return res

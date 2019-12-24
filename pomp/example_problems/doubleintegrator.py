@@ -1,10 +1,11 @@
 from OpenGL.GL import *
-from geometric import *
-from ..spaces.objective import *
+from .geometric import *
+from ..spaces.objectives import *
 from ..spaces.statespace import *
 from ..spaces.configurationspace import *
 from ..spaces.edgechecker import *
 from ..spaces.metric import *
+from ..spaces.biassets import BoxBiasSet
 from ..planners.problem import PlanningProblem
 
 class DoubleIntegratorVisualizer:
@@ -44,7 +45,8 @@ def doubleIntegratorTest():
     cspace = Geometric2DCSpace()
     #cspace.addObstacle(Circle(0.5,0.4,0.39))
     vspace = BoxConfigurationSpace([-1,-1],[1,1])
-    aspace = BoxConfigurationSpace([-5,-5],[5,5])
+    aspace = BoxSet([-5,-5],[5,5])
+    aspace.box = BoxBiasSet(aspace.bmin,aspace.bmax,10)
     start = [0.06,0.25,0,0]
     goal = [0.94,0.25,0,0]
     objective = TimeObjectiveFunction()

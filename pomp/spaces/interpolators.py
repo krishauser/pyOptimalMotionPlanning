@@ -1,6 +1,10 @@
+from __future__ import print_function,division
+from builtins import range
+from six import iteritems
+
 import math
 from ..klampt import vectorops,trajectory
-from geodesicspace import GeodesicSpace
+from .geodesicspace import GeodesicSpace
 
 class Interpolator:
     """A base class for an interpolating curve"""
@@ -113,7 +117,7 @@ class LambdaInterpolator(Interpolator):
         else:
             L = 0
             p = self.a
-            for i in xrange(self.lengthDivisions):
+            for i in range(self.lengthDivisions):
                 n = self.eval(float(i+1)/self.lengthDivisions)
                 L += self.space.distance(p,n)
                 p = n

@@ -146,7 +146,7 @@ class MultiPath:
             for h in sec.holdIndices:
                 xh = ET.SubElement(xs,"hold")
                 xh.set("name",str(h))
-            for i in xrange(len(sec.configs)):
+            for i in range(len(sec.configs)):
                 xm = ET.Element("milestone")
                 xs.append(xm)
                 xm.set("config",writeVector(sec.configs[i]))

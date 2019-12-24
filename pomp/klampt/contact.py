@@ -17,7 +17,7 @@ def idToObject(world,ID):
     if ID < world.numRigidObjects():
         return world.rigidObject(ID)
     ID -= world.numRigidObjects()
-    for i in xrange(world.numRobots()):
+    for i in range(world.numRobots()):
         if ID==0:
             return world.robot(i)
         ID -= 1
@@ -110,8 +110,8 @@ def simContactMap(sim):
     current contacts (among bodies with collision feedback enabled)."""
     cmap = dict()
     w = sim.getWorld()
-    for a in xrange(w.numIDs()):
-        for b in xrange(a):
+    for a in range(w.numIDs()):
+        for b in range(a):
             c = sim.getContacts(a,b)
             if len(c) > 0:
                 #figure out the objects corresponding to a and b

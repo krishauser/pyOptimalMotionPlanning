@@ -6,7 +6,7 @@ These are useful for interfacing with C code.
 """
 
 import math
-import vectorops
+from . import vectorops
 
 def __str__(R):
     """Converts a rotation to a string."""
@@ -43,8 +43,8 @@ def mul(R1,R2):
     m1=matrix(R1)
     m2T=matrix(inv(R2))
     mres = matrix(identity())
-    for i in xrange(3):
-        for j in xrange(3):
+    for i in range(3):
+        for j in range(3):
             mres[i][j] = vectorops.dot(m1[i],m2T[j])
     #print "Argument 1"
     #print __str__(R1)
@@ -162,8 +162,8 @@ def rotation(axis,angle):
 
     #m = s[r]-c[r][r]+rrt = s[r]-c(rrt-I)+rrt = cI + rrt(1-c) + s[r]
     R = vectorops.mul(cross_product(axis),sm)
-    for i in xrange(3):
-        for j in xrange(3):
+    for i in range(3):
+        for j in range(3):
             R[i*3+j] += axis[i]*axis[j]*(1.-cm)
     R[0] += cm
     R[4] += cm

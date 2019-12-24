@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function,division
+from six import iteritems
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,7 +9,7 @@ import math
 from collections import defaultdict
 
 if len(sys.argv) < 3:
-    print "Usage: viewsummary.py csvfile item"
+    print("Usage: viewsummary.py csvfile item")
     exit(0)
 
 successFraction = 0.5
@@ -73,7 +75,7 @@ with open(sys.argv[1],'r') as f:
                 elif suffix=='':
                     vmean[label] = v
                 else:
-                    print "Warning, unknown suffix",suffix
+                    print("Warning, unknown suffix",suffix)
         
         for label,t in time.iteritems():
             if label in skip and skip[label]:
@@ -81,8 +83,8 @@ with open(sys.argv[1],'r') as f:
             elif label in vmean:
                 items[label].append((t,vmean[label]))
             else:
-                print "Warning, no item",item,"for planner",label,"read"
-    print "Available planners:",items.keys()
+                print("Warning, no item",item,"for planner",label,"read")
+    print("Available planners:",list(items.keys()))
 
     #small, good for printing
     #fig = plt.figure(figsize=(4,2.7))
@@ -99,12 +101,12 @@ with open(sys.argv[1],'r') as f:
         if label not in items: continue
         plot = items[label]
         if len(items[label])==0:
-            print "Skipping item",label
+            print("Skipping item",label
         x,y = zip(*plot)
         minx = min(minx,*[v for v in x if v is not None])
         maxx = max(maxx,*[v for v in x if v is not None])
         plannername = labelmap[label] if label in labelmap else label
-        print "Plotting",plannername
+        print("Plotting",plannername)
         line = ax1.plot(x,y,label=plannername,dashes=dashes[n])
         plt.setp(line,linewidth=1.5)
     #plt.legend(loc='upper right');

@@ -114,39 +114,39 @@ class map:
         if name in['obj','setter']: return self.__dict__[name]
         if isinstance(self.obj,WorldModel):
             if name == 'robots':
-                return _index_name_map([self.obj.robot(i) for i in xrange(self.obj.numRobots())])
+                return _index_name_map([self.obj.robot(i) for i in range(self.obj.numRobots())])
             elif name == 'rigidObjects':
-                return _index_name_map([self.obj.rigidObject(i) for r in xrange(self.obj.numRigidObjects())])
+                return _index_name_map([self.obj.rigidObject(i) for r in range(self.obj.numRigidObjects())])
             elif name == 'terrains':
-                return _index_name_map([self.obj.terrain(i) for r in xrange(self.obj.numTerrains())])
+                return _index_name_map([self.obj.terrain(i) for r in range(self.obj.numTerrains())])
             elif name == 'elements':
-                elements = [self.obj.terrain(i) for r in xrange(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for r in xrange(self.obj.numRigidObjects())]
-                for i in xrange(self.obj.numRobots()):
+                elements = [self.obj.terrain(i) for r in range(self.obj.numTerrains())]+[self.obj.rigidObjects(i) for r in range(self.obj.numRigidObjects())]
+                for i in range(self.obj.numRobots()):
                     elements.append(self.obj.robot(i))
                     for j in self.obj.robot(i).numLinks():
                         elements.append(self.obj.robotModelLink(i,j))
                 return _index_name_map(elements)
             else:
-                for i in xrange(self.obj.numRobots()):
+                for i in range(self.obj.numRobots()):
                     if name == self.obj.robot(i).getName():
                         return map(self.obj.robot(i))
-                for i in xrange(self.obj.numRigidObjects()):
+                for i in range(self.obj.numRigidObjects()):
                     if name == self.obj.rigidObject(i).getName():
                         return map(self.obj.rigidObject(i))
-                for i in xrange(self.obj.numTerrains()):
+                for i in range(self.obj.numTerrains()):
                     if name == self.obj.terrain(i).getName():
                         return map(self.obj.terrain(i))
         elif isinstance(self.obj,RobotModel):
             if name == 'id':
                 return self.obj.getID()
             elif name == 'links':
-                return _index_name_map([self.obj.getLink(i) for i in xrange(self.obj.numLinks())])
+                return _index_name_map([self.obj.getLink(i) for i in range(self.obj.numLinks())])
             elif name == 'config':
                 return map(self.obj.getConfig(),self.obj.setConfig)
             elif name == 'velocity':
                 return map(self.obj.getVelocity(),self.obj.setVelocity)
             else:
-                for i in xrange(self.obj.numLinks()):
+                for i in range(self.obj.numLinks()):
                     if self.obj.getLink(i).getName() == name:
                         return map(self.obj.getLink(i))
         elif isinstance(self.obj,RobotModelLink):

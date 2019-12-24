@@ -1,7 +1,11 @@
-from configurationspace import *
-from timespace import *
-from interpolators import *
-from sets import *
+from .configurationspace import *
+from .timespace import *
+from .interpolators import *
+from .sets import *
+from .biassets import TimeBiasSet
+import numpy as np
+
+MAX_INTEGRATION_STEPS = 10000
 
 class ControlSpace:
     """A space regarding control variable u and its effects on members of a
@@ -26,9 +30,42 @@ class ControlSpace:
         """Returns the sequence of controls that connects x to y, if
         applicable"""
         return None
+        
+    def nextState_jacobian(self,x,u):
+        """If you want to use numerical optimization methods, implement
+        this. Subclasses can use nextState_jacobian_diff to approximate
+        the Jacobian."""
+        return self.nextState_jacobian_diff(x,u)
+    
+    def nextState_jacobian_diff(self,x,u,h=1e-4):
+        Jx = differences.jacobian_forward_difference((lambda y:self.nextState(y,u)),x,h)
+        Ju = differences.jacobian_forward_difference((lambda v:self.nextState(x,v)),u,h)
+        return (Jx,Ju)
+
+    def checkDerivatives(self,x,u,baseTol=1e-3):
+        Jx,Ju = self.nextState_jacobian(x,u)
+        dJx,dJu = self.nextState_jacobian_diff(x,u)
+        xtol = max(1,np.linalg.norm(dJx))*baseTol
+        utol = max(1,np.linalg.norm(dJu))*baseTol
+        res = True
+        if np.linalg.norm(Jx-dJx) > xtol:
+            print("Derivatives of ControlSpace",self.__class__.__name__,"incorrect in Jacobian x by",np.linalg.norm(Jx-dJx),"diff norm",np.linalg.norm(dJx))
+            #print("  Computed",Jx)
+            #print("  Differenced",dJx)
+            res = False
+        if np.linalg.norm(Ju-dJu) > utol:
+            print("Derivatives of ControlSpace",self.__class__.__name__,"incorrect in Jacobian u by",np.linalg.norm(Ju-dJu),"diff norm",np.linalg.norm(dJu))
+            #print("  Computed",Ju)
+            #print("  Differenced",dJu)
+            res = False
+        return res
+
 
 class ControlSpaceAdaptor(ControlSpace):
-    """Adapts a plain ConfigurationSpace to a ControlSpace"""
+    """Adapts a plain ConfigurationSpace to a ControlSpace. The
+    control is simply the next state, and the function f(x,u) simply
+    produces the next state x'=u.
+    """
     def __init__(self,cspace,nextStateSamplingRange=1.0):
         self.cspace = cspace
         self.nextStateSamplingRange = 1.0
@@ -37,11 +74,43 @@ class ControlSpaceAdaptor(ControlSpace):
     def controlSet(self,x):
         return NeighborhoodSubset(self.cspace,x,self.nextStateSamplingRange)
     def nextState(self,x,u):
-        return u
+        return u.copy()
     def interpolator(self,x,u):
         return self.cspace.interpolator(x,u)
     def connection(self,x,y):
         return [y]
+    def nextState_jacobian(self,x,u):
+        return np.zeros((len(x),len(x))),np.eye(len(u))
+
+
+class LTIControlSpace(ControlSpace):
+    """Implements a discrete-time, linear time invariant control
+    space f(x,u) = Ax+Bu.
+    """
+    def __init__(self,cspace,controlSet,A,B):
+        self.cspace = cspace
+        self.uspace = controlSet
+        self.A = A
+        self.B = B
+    def configurationSpace(self):
+        return self.cspace
+    def controlSet(self,x):
+        return self.uspace
+    def nextState(self,x,u):
+        return (self.A.dot(x) + self.B.dot(u)).tolist()
+    def interpolator(self,x,u):
+        return self.cspace.interpolator(x,self.nextState(x,u))
+    def connection(self,x,y):
+        #TODO: solve for multi-step control (if controllable)
+        if self.B.shape[1] < self.B.shape[0]: return None
+        xn = self.A.dot(x)
+        dx = np.asarray(y)-np.asarray(xn)
+        Binv = np.linalg.pinv(self.B)
+        return [Binv.dot(dx)]
+    def nextState_jacobian(self,x,u):
+        return self.A,self.B
+
+
 
 class Dynamics:
     """A differential equation relating state x to control variable u.
@@ -51,32 +120,6 @@ class Dynamics:
     def derivative(self,x,u):
         raise NotImplementedError()
 
-class TimeBiasSet(BoxSet):
-    """A set for an integration time variable that samples more-or-less
-    uniformly from the *outcome* state, given a maximum integration duration
-    and a space of controls uspace.
-
-    It assumes the next state is obtained by the integral
-       int[0,T] f(x(t),u) dt
-    and the function f(x,u) is not degenerate.  With this assumption, the
-    the volume of the reachable set grows proportionally to T^d where d
-    is the control dimension.  Hence, the sampler samples T from the range
-    [0,tmax] according to the distribution U(0,1)^(1/d)*tmax.  In practice,
-    this places more samples toward the tail end of the integration region. 
-    """
-    def __init__(self,tmax,uspace):
-        BoxSet.__init__(self,[0],[tmax])
-        self.tmax = tmax
-        self.controlDimension = len(uspace.sample())
-        #if self.controlDimension == 1:
-        #    self.controlDimension = 2
-    def sample(self):
-        #plain time sampling
-        #return [random.uniform(0,self.tmax)]
-        #sampling from upper half
-        #return [random.uniform(self.tmax*0.5,self.tmax)]
-        #sampling with a power law bias
-        return [math.pow(random.random(),1.0/self.controlDimension)*self.tmax]
 
 class KinodynamicSpace (ControlSpace):
     """A control space that adapts a dynamic space to a cspace.
@@ -106,13 +149,18 @@ class KinodynamicSpace (ControlSpace):
         ub = u[1:]
         path = [x]
         t = 0.0
+        assert self.dt > 0
+        dt0 = self.dt
+        if duration / self.dt > MAX_INTEGRATION_STEPS:
+            print("Warning, more than",MAX_INTEGRATION_STEPS,"steps requested for KinodynamicSpace",self.__class__.__name__)
+            dt0 = duration/MAX_INTEGRATION_STEPS
         while t < duration:
             dx = self.dspace.derivative(path[-1],ub)
-            assert len(dx)==len(x),"Derivative dimension not equal to state dimension"
-            dt = min(self.dt,duration-t)
+            assert len(dx)==len(x),"Derivative %s dimension not equal to state dimension: %d != %d"%(self.dspace.__class__.__name__,len(dx),len(x))
+            dt = min(dt0,duration-t)
             xnew = vectorops.madd(path[-1],dx,dt)
             path.append(xnew)
-            t = min(t+self.dt,duration)
+            t = min(t+dt0,duration)
         return path
     def nextState(self,x,u):
         return self.trajectory(x,u)[-1]
@@ -147,14 +195,18 @@ class TimedKinodynamicSpace (ControlSpace):
         duration = u[0]
         ub = u[1:]
         path = [x]
+        dt0 = self.dt
+        if duration / self.dt > MAX_INTEGRATION_STEPS:
+            print("Warning, more than",MAX_INTEGRATION_STEPS,"steps requested for KinodynamicSpace",self.__class__.__name__)
+            dt0 = duration/MAX_INTEGRATION_STEPS
         t = 0.0
         while t < duration:
             dx = self.dspace.derivative(path[-1][1:],ub)
             assert len(dx)==len(x),"Derivative dimension not equal to state dimension"
-            dt = min(self.dt,duration-t)
+            dt = min(dt0,duration-t)
             xnew = vectorops.madd(path[-1][1:],dx,dt)
             path.append([path[-1][0]+dt]+xnew)
-            t = min(t+self.dt,duration)
+            t = min(t+dt0,duration)
         return path
     def nextState(self,x,u):
         return self.trajectory(x,u)[-1]
@@ -165,6 +217,7 @@ class TimedKinodynamicSpace (ControlSpace):
         return res
     def connection(self,x,y):
         return None
+
 
 class LambdaKinodynamicSpace (ControlSpace):
     """A control space that takes a cspace, a state-invariant control space,
@@ -195,14 +248,18 @@ class LambdaKinodynamicSpace (ControlSpace):
         duration = u[0]
         ub = u[1:]
         path = [x]
+        dt0 = self.dt
+        if duration / self.dt > MAX_INTEGRATION_STEPS:
+            print("Warning, more than",MAX_INTEGRATION_STEPS,"steps requested for",self.__class__.__name__)
+            dt0 = duration/MAX_INTEGRATION_STEPS
         t = 0.0
         while t < duration:
             dx = self.f(path[-1],ub)
             assert len(dx)==len(x),"Derivative dimension not equal to state dimension"
-            dt = min(self.dt,duration-t)
+            dt = min(dt0,duration-t)
             xnew = vectorops.madd(path[-1],dx,dt)
             path.append(xnew)
-            t = min(t+self.dt,duration)
+            t = min(t+dt0,duration)
         return path
     def nextState(self,x,u):
         return self.trajectory(x,u)[-1]
@@ -231,13 +288,13 @@ class RepeatedControlSpace(ControlSpace):
         return MultiSet(*[self.base.controlSet(x)]*self.n)
     def nextState(self,x,u):
         d = len(u)/self.n
-        for start in xrange(0,len(u),d):
+        for start in range(0,len(u),d):
             x = self.base.nextState(x,u[start:start+d])
         return x
     def interpolator(self,x,u):
         d = len(u)/self.n
         res = PathInterpolator([])
-        for start in xrange(0,len(u),d):
+        for start in range(0,len(u),d):
             res.edges.append(self.base.interpolator(x,u[start:start+d]))
             x = res.edges[-1].end()
         return res

@@ -1,5 +1,5 @@
-from so2space import *
-from configurationspace import *
+from .so2space import *
+from .configurationspace import *
 
 class SE2Space(MultiGeodesicSpace,MultiConfigurationSpace):
     def __init__(self):

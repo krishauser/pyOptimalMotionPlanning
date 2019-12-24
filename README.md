@@ -1,16 +1,17 @@
 # pyOptimalMotionPlanning
 Optimal Motion Planning package in Python
 
-v0.1
+v0.2
 
 Kris Hauser
 
-7/27/2015
+- v0.1: released 7/27/2015
+- v0.2: released 12/24/2019.  Added Python 3 support, some experimental numerical optimization libraries.
 
 
 
 Requirements:
-- Python 2.X
+- Python 2.X or 3.X
 - Numpy/Scipy
 - PyOpenGL
 - Matplotlib (optional)

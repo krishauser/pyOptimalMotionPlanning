@@ -1,3 +1,5 @@
+from __future__ import print_function,division
+from six import iteritems
 
 class CountProfiler:
     """Collects an accumulated item."""
@@ -86,10 +88,10 @@ class Profiler:
             self.items[item] = Profiler()
             return self.items[item]
     def pretty_print(self,indent=0):
-        for (k,v) in self.items.iteritems():
-            print ' '*indent+str(k),":",
+        for (k,v) in iteritems(self.items):
+            print(' '*indent+str(k),":",end='')
             if isinstance(v,Profiler):
-                print
+                print()
                 v.pretty_print(indent+1)
             else:
-                print str(v)
+                print(str(v))

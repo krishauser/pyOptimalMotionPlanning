@@ -1,6 +1,6 @@
 from OpenGL.GL import *
-from geometric import *
-from ..spaces.objective import *
+from .geometric import *
+from ..spaces.objectives import *
 from ..spaces.statespace import *
 from ..spaces.configurationspace import *
 from ..spaces.edgechecker import *
@@ -8,6 +8,12 @@ from ..spaces.metric import *
 from ..planners.problem import PlanningProblem
 from ..spaces.so2space import *
 from ..klampt import so2
+
+def cmp(x,y):
+    if x < y: return -1
+    elif x > y: return 1
+    return 0
+    
 
 class DubinsVisualizer:
     def __init__(self,workspace):
@@ -110,7 +116,7 @@ class DubinsCarSpace (ControlSpace):
         else:
             #rotate about a center of rotation, with radius 1/phi
             cor = vectorops.madd(pos,right,1.0/phi)
-            sign=cmp(d*phi,0)
+            sign = cmp(d*phi,0)
             d = abs(d)
             phi = abs(phi)
             theta=0
@@ -127,7 +133,7 @@ class DubinsCarDistanceObjectiveFunction(ObjectiveFunction):
     def __init__(self,n):
         self.n = n
     def incremental(self,x,u):
-        return sum(abs(u[i*2]) for i in xrange(self.n))
+        return sum(abs(u[i*2]) for i in range(self.n))
 
 def dubinsCarTest():
     cspace = Geometric2DCSpace()

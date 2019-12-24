@@ -1,5 +1,5 @@
 from ..klampt import so2
-from configurationspace import *
+from .configurationspace import *
 import random
 import math
 

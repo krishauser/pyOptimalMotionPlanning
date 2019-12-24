@@ -1,3 +1,6 @@
+from __future__ import print_function,division
+from six import iteritems,iterkeys
+
 import random
 
 class RandomDict(object):
@@ -73,13 +76,13 @@ class RandomDict(object):
         else:
             weights = {}
             sumweight = 0.0
-            for k,v in self.dictionary.iteritems():
+            for k,v in iteritems(self.dictionary):
                 w = weight(k,v)
                 weights[k] = w
                 sumweight += weights[k]
             u = random.random()*sumweight
-            for k,v in self.dictionary.iteritems():
+            for k,v in iteritems(self.dictionary):
                 u -= weights[k]
                 if u <= 0: return k
-            print "Numerical error in random_key"
-            return self.dictionary.iterkeys().next()
+            print("Numerical error in random_key")
+            return iterkeys(self.dictionary).next()

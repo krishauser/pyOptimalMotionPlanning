@@ -1,5 +1,9 @@
 """Helper for K-nearest neighbor queries"""
 
+from __future__ import print_function,division
+from six import iteritems
+from builtins import range
+
 class KNearestResult:
     def __init__(self,k):
         assert k > 0
@@ -14,7 +18,7 @@ class KNearestResult:
             if distance < self.distances[self.imin]:
                 self.imin = self.imax
             #update imin
-            for i in xrange(len(self.items)):
+            for i in range(len(self.items)):
                 if self.distances[i] > self.distances[self.imax]:
                     self.imax = i
     def minimum_distance(self):
@@ -22,5 +26,5 @@ class KNearestResult:
     def maximum_distance(self):
         return self.distances[self.imax]
     def sorted_items(self):
-        sorted_res = sorted((d,i) for (i,d) in zip(self.items,self.distances) if d!=float('inf'))
+        sorted_res = sorted([(d,i) for (i,d) in zip(self.items,self.distances) if d!=float('inf')])
         return [v[1] for v in sorted_res]

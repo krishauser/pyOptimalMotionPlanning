@@ -2,8 +2,8 @@
 the Hold class, and the functions readHold(text) and writeHold(h).
 """
 
-import vectorops
-import so3
+from . import vectorops
+from . import so3
 
 class Hold:
     """A Hold, similar to the Hold class in the C++ RobotSim library.

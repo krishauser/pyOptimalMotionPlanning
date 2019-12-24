@@ -7,13 +7,17 @@ over OpenGL (GLUT).
   constant time step.
 """
 
+from __future__ import print_function,division
+from builtins import range
+from six import iteritems
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import camera
-import se3
-import so3
-import vectorops
+from . import camera
+from . import se3
+from . import so3
+from . import vectorops
 import math
 import time
 
@@ -163,11 +167,11 @@ class GLProgram:
         try:
             import Image
         except ImportError:
-            print "Cannot save screens to disk, the Python Imaging Library is not installed"
+            print("Cannot save screens to disk, the Python Imaging Library is not installed")
             return
         screenshot = glReadPixels( 0,0, self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE)
         im = Image.frombuffer("RGBA", (self.width, self.height), screenshot, "raw", "RGBA", 0, 0)
-        print "Saving screen to",fn
+        print("Saving screen to",fn)
         im.save(fn)
 
     

@@ -1,8 +1,10 @@
+from __future__ import print_function,division
+from six import iteritems
 from ..spaces.metric import *
 from ..spaces.controlspace import *
 from ..spaces.edgechecker import *
-from kinodynamicplanner import *
-from rrtstarplanner import *
+from .kinodynamicplanner import *
+from .rrtstarplanner import *
 
 all_planners = ['ao-est','ao-rrt','r-est','r-est-prune','r-rrt','r-rrt-prune','rrt*','anytime-rrt','stable-sparse-rrt','sst*']
 rrt_planners = ['ao-rrt','anytime-rrt','r-rrt','r-rrt-prune','stable-sparse-rrt','sst*']
@@ -41,14 +43,14 @@ def makePlanner(type,space,start,goal,
             controlSpace = ControlSpaceAdaptor(space)
             controlSpace.nextStateSamplingRange = popdefault(params,'nextStateSamplingRange',0.1,'makePlanner(): Warning, control space sampling range not provided, using 0.1')
 
-    if isinstance(goal,(list,tuple)) or isinstance(goal,SingletonSubset):
+    if isinstance(goal,(list,tuple)) or isinstance(goal,SingletonSet):
         raise RuntimeError("Cannot yet handle singleton goals")
 
     if heuristic==None and costLowerBound != None:
-        print "Constructing default heuristic from cost lower bound"
+        print("Constructing default heuristic from cost lower bound")
         heuristicCostToCome = lambda x:costLowerBound(start,x)
         if goal.project(start) == None:
-            print "  No cost-to-go heuristic."
+            print("  No cost-to-go heuristic.")
             heuristicCostToGo = None
         else:
             def h(x):

@@ -1,4 +1,4 @@
-from configurationspace import *
+from .configurationspace import *
 
 class TCSpace(MultiConfigurationSpace):
     """A configuration space that prepends the time variable t to another

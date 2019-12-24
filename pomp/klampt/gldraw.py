@@ -1,8 +1,8 @@
 """OpenGL drawing functions for geometric primitives."""
 
 import math
-import vectorops
-import se3
+from . import vectorops
+from . import se3
 import ctypes
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -29,7 +29,7 @@ def circle(center,radius,res=0.01,filled=True):
         glVertex2f(*center)
     else:
         glBegin(GL_LINE_STRIP)
-    for i in xrange(numdivs+1):
+    for i in range(numdivs+1):
         u = float(i)/float(numdivs)*math.pi*2
         glVertex2f(center[0]+radius*math.cos(u),center[1]+radius*math.sin(u))
     glEnd()

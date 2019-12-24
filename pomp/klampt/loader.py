@@ -78,7 +78,7 @@ def readMatrix(text):
         raise ValueError("Invalid number of matrix elements, should be %d, instead got %d"%(m*n,len(items)-2))
     k = 2
     x = []
-    for i in xrange(m):
+    for i in range(m):
         x.append([float(v) for v in items[k:k+n]])
         k += n
     return x

@@ -1,9 +1,10 @@
 from OpenGL.GL import *
 from ..klampt import gldraw
-from ..spaces.objective import *
+from ..spaces.objectives import *
 from ..spaces.configurationspace import *
 from ..spaces.edgechecker import *
 from ..spaces.metric import *
+from ..spaces.configurationspace import NeighborhoodSubset,SingletonSubset
 from ..planners.problem import PlanningProblem
 
 class Circle:
@@ -14,24 +15,27 @@ class Circle:
     def contains(self,point):
         return (vectorops.distance(point,self.center) <= self.radius)
 
+    def signedDistance(self,point):
+        return (vectorops.distance(point,self.center) - self.radius)
+    
+    def signedDistance_gradient(self,point):
+        d = vectorops.sub(point,self.center)
+        return vectorops.div(d,vectorops.norm(d))
+
     def drawGL(self,res=0.01):
         numdivs = int(math.ceil(self.radius*math.pi*2/res))
         glBegin(GL_TRIANGLE_FAN)
         glVertex2f(*self.center)
-        for i in xrange(numdivs+1):
+        for i in range(numdivs+1):
             u = float(i)/float(numdivs)*math.pi*2
             glVertex2f(self.center[0]+self.radius*math.cos(u),self.center[1]+self.radius*math.sin(u))
         glEnd()
 
 
-class Box:
+class Box(BoxSet):
     def __init__(self,x1=0,y1=0,x2=0,y2=0):
-        self.bmin = (min(x1,x2),min(y1,y2))
-        self.bmax = (max(x1,x2),max(y1,y2))
+        BoxSet.__init__(self,[min(x1,x2),min(y1,y2)],[max(x1,x2),max(y1,y2)])
         
-    def contains(self,point):
-        return self.bmin[0] <= point[0] <= self.bmax[0] and self.bmin[1] <= point[1] <= self.bmax[1]
-
     def drawGL(self):
         glBegin(GL_QUADS)
         glVertex2f(*self.bmin)
@@ -45,8 +49,10 @@ class Geometric2DCSpace (BoxConfigurationSpace):
     def __init__(self):
         BoxConfigurationSpace.__init__(self,[0,0],[1,1])
         self.obstacles = []
+
     def addObstacle(self,obs):
         self.obstacles.append(obs)
+
     def feasible(self,x):
         if not BoxConfigurationSpace.feasible(self,x): return False
         for o in self.obstacles:
@@ -111,7 +117,7 @@ class Geometric2DCSpace (BoxConfigurationSpace):
             glColor3f(1,0,0)
             glPointSize(7.0)
             glBegin(GL_POINTS)
-            for i in xrange(50):
+            for i in range(50):
                 q = goal.sample()
                 glVertex2f(q[0],q[1])
             glEnd()
@@ -132,12 +138,24 @@ class Geometric2DCSpace (BoxConfigurationSpace):
             glEnd()
         else:
             glBegin(GL_LINE_STRIP)
-            for s in xrange(10):
+            for s in range(10):
                 u = float(s) / (9.0)
                 x = interpolator.eval(u)
                 glVertex2f(x[0],x[1])
             glEnd()
         self.endDraw()
+
+    def clearance(self,x):
+        res = BoxConfigurationSpace.clearance(self,x)
+        for o in self.obstacles:
+            res.append(o.signedDistance(x))
+        return res
+    
+    def clearance_gradient(self,x):
+        res = [BoxConfigurationSpace.clearance_gradient(self,x)]
+        for o in self.obstacles:
+            res.append(o.signedDistance_gradient(x))
+        return np.vstack(res)
 
 
 def circleTest():
@@ -194,6 +212,7 @@ def kinkTest():
 def bugtrapTest():
     space = Geometric2DCSpace()
     w = 0.1
+    """
     space.addObstacle(Box(0.55,0.25,0.6,0.75))
     space.addObstacle(Box(0.15,0.25,0.55,0.3))
     space.addObstacle(Box(0.15,0.7,0.55,0.75))
@@ -201,6 +220,10 @@ def bugtrapTest():
     space.addObstacle(Box(0.15,0.5+w*0.5,0.2,0.75))
     start=[0.5,0.5]
     goal=[0.65,0.5]
+    """
+    start=[0.1,0.5]
+    goal=[0.9,0.5]
+    space.addObstacle(Box(0.3,0.3,0.7,0.7))
     goalRadius = 0.1
     objective = PathLengthObjectiveFunction()
     return PlanningProblem(space,start,goal,

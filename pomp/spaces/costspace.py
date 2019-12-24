@@ -1,6 +1,10 @@
-from controlspace import *
-from interpolators import *
-from objective import ObjectiveFunction
+from __future__ import print_function,division
+from builtins import range
+from six import iteritems
+
+from .controlspace import *
+from .interpolators import *
+from .objective import ObjectiveFunction
 
 
 class CostControlSpace(ControlSpace):

@@ -1,5 +1,8 @@
+from __future__ import print_function,division
+from six import iteritems
+
 import math
-from knn import *
+from .knn import *
 from ..spaces import metric
 from ..klampt import so2
 
@@ -16,6 +19,7 @@ class Node:
         - points: a list of (point,data) pairs
         - splitdim: the default split dimension.
         """
+        assert isinstance(points,(list,tuple))
         self.points = points
         self.splitdim = splitdim
         self.depth = 0
@@ -89,7 +93,7 @@ class KDTree:
         running time."""
         self.maxDepth = 0
         self.numNodes = 1
-        self.root = Node(zip(points,data))
+        self.root = Node(list(zip(points,data)))
         self.recursive_split(self.root,optimize=True)
 
     def recursive_split(self,node,force=False,optimize=False):
@@ -214,12 +218,12 @@ class KDTree:
         dorebalance = force
         if not force:
             idealdepth = math.log(self.numNodes)
-            #print "ideal depth",idealdepth,"true depth",self.maxDepth
+            #print("ideal depth",idealdepth,"true depth",self.maxDepth)
             if self.maxDepth > idealdepth*10:
                 dorebalance = True
         if not dorebalance:
             return False
-        print "Rebalancing KD-tree..."
+        print("Rebalancing KD-tree...")
         points = []
         def recurse_add_points(node):
             points += node.points
@@ -227,7 +231,7 @@ class KDTree:
             if node.right: recurse_add_points(node.right)
         recurse_add_points(self.root)
         self.set(zip(*points))
-        print "Done."
+        print("Done.")
         return True
 
     def _nearest(self,node,x,dmin,filter=None):
@@ -284,6 +288,8 @@ class KDTree:
         Returns the (point,data) pair in the tree closest to the point x"""
         if self.root == None: return []
         closest,dmin = self._nearest(self.root,x,float('inf'),filter)
+        if closest is None:
+            input()
         return closest
 
     def _knearest(self,node,x,res,filter=None):

@@ -1,11 +1,12 @@
 from OpenGL.GL import *
-from geometric import *
-from ..spaces.objective import *
+from .geometric import *
+from ..spaces.objectives import *
 from ..spaces.statespace import *
 from ..spaces.configurationspace import *
 from ..spaces.edgechecker import *
 from ..spaces.metric import *
 from ..spaces.so2space import *
+from ..spaces.biassets import *
 from ..planners.problem import PlanningProblem
 
 class PendulumVisualizer:
@@ -75,7 +76,7 @@ class PendulumVisualizer:
             glEnd()
         else:
             glBegin(GL_LINE_STRIP)
-            for s in xrange(10):
+            for s in range(10):
                 u = float(s) / (9.0)
                 x = interpolator.eval(u)
                 v = self.toScreen(x)
@@ -98,14 +99,19 @@ class PendulumGoalSet(Set):
     def __init__(self,bmin,bmax):
         self.bmin = bmin
         self.bmax = bmax
+        self.box = BoxSet([0,bmin[1]],[so2.diff(self.bmax[0],self.bmin[0]),bmax[1]])
     def bounded(self):
         return True
     def sample(self):
         return [random.uniform(self.bmin[0],self.bmax[0]),random.uniform(self.bmin[1],self.bmax[1])]
     def contains(self,x):
-        return (0 <= so2.diff(x[0],self.bmin[0]) <= so2.diff(self.bmax[0],self.bmin[0])) and \
-               (self.bmin[1] <= x[1] <= self.bmax[1])
+        return self.box.contains([so2.diff(x[0],self.bmin[0]),x[1]])
 
+    def signedDistance(self,x):
+        return self.box.signedDistance([so2.diff(x[0],self.bmin[0]),x[1]])
+    
+    def signedDistance_gradient(self,x):
+        return self.box.signedDistance_gradient([so2.diff(x[0],self.bmin[0]),x[1]])
 
 class Pendulum:
     def __init__(self):
@@ -131,7 +137,7 @@ class Pendulum:
 
     def controlSet(self):
         if self.bangbang:
-            return FiniteSet([[self.torque_min],[0],[self.torque_max]])
+            return BoxBiasSet([self.torque_min],[self.torque_max],concentration=float('inf'))
         else:
             return BoxSet([self.torque_min],[self.torque_max])
 

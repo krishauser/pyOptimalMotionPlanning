@@ -1,3 +1,6 @@
+from __future__ import print_function,division
+from six import iteritems
+
 import random
 
 infty = float('inf')
@@ -11,9 +14,9 @@ def popdefault(mapping,item,default,warning=True):
         return res
     except KeyError:
         if warning == True:
-            print "Parameter",item,"not specified, using default",default
+            print("Parameter",item,"not specified, using default",default)
         elif warning != None and warning != False:
-            print warning
+            print(warning)
         return default
 
 def arg_min(weights,args = None):
@@ -38,7 +41,7 @@ def cumsum(ls):
     r = [0 for v in ls]
     for i,v in enumerate(ls):
         acc += v
-	r[i] = acc
+        r[i] = acc
     return r
 
 def sample_weighted(weights, vals=None, eps=1.0e-4):

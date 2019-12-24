@@ -6,7 +6,7 @@
 """
 
 import bisect
-import vectorops
+from . import vectorops
 
 class Trajectory:
 	"""A basic piecewise-linear trajectory class, which can be overloaded
@@ -286,7 +286,7 @@ class HermiteTrajectory(Trajectory):
 		dcv2 = 3.0*u2-2.0*u
 		x = [0]*len(x1)
 		dx = [0]*len(x1)
-		for i in xrange(len(x1)):
+		for i in range(len(x1)):
 			x[i] = cx1*x1[i] + cx2*x2[i] + cv1*v1[i] + cv2*v2[i]
 			dx[i] = dcx1*x1[i] + dcx2*x2[i] + dcv1*v1[i] + dcv2*v2[i];
 		return x+dx
@@ -307,7 +307,7 @@ class HermiteTrajectory(Trajectory):
 		ddcv2 = 6.0*u-2.0
 		dx = [0]*len(x1)
 		ddx = [0]*len(x1)
-		for i in xrange(len(x1)):
+		for i in range(len(x1)):
 			dx[i] = dcx1*x1[i] + dcx2*x2[i] + dcv1*v1[i] + dcv2*v2[i]
 			ddx[i] = ddcx1*x1[i] + ddcx2*x2[i] + ddcv1*v1[i] + ddcv2*v2[i]
 		return dx+ddx

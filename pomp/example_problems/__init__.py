@@ -1,1 +1,1 @@
-__all__ = ['doubleintegrator','dubins','flappy','geometric','pendulum']
+__all__ = ['doubleintegrator','dubins','flappy','geometric','pendulum','lqr']

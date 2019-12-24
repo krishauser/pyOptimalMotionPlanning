@@ -1,8 +1,14 @@
-from klampt.glprogram import GLProgram
-from klampt import vectorops,so2,gldraw
-from spaces import metric
-from planners import allplanners
-from planners.kinodynamicplanner import EST
+from __future__ import print_function,division
+from builtins import range
+from six import iteritems
+
+from .klampt.glprogram import GLProgram
+from .klampt import vectorops,so2,gldraw
+from .spaces import metric
+from .planners import allplanners
+from .planners.kinodynamicplanner import EST
+from .planners.optimization import iLQR
+from .spaces.objectives import *
 from OpenGL.GL import *
 import os,errno
 
@@ -15,6 +21,16 @@ def mkdir_p(path):
             raise
 
 class PlanVisualizationProgram(GLProgram):
+    """Attributes:
+        problem (PlanningProblem): the overall planning problem
+        planner (multiple...): the planner selected for testing
+        plannerFilePrefix (str): where to save testing data
+    
+    Internal attributes:
+        path (Trajectory): if a solution is found, the best trajectory
+        G (pair (V,E)): the roadmap for the planner.
+        painted, save_movie, movie_frame: used for drawing / saving movies.
+    """
     def __init__(self,problem,planner,plannerFilePrefix):
         GLProgram.__init__(self)
         self.problem = problem
@@ -30,7 +46,7 @@ class PlanVisualizationProgram(GLProgram):
         if state == 0:
             if hasattr(self.planner,'nextSampleList'):
                 self.planner.nextSampleList.append(self.problem.visualizer.toState(float(x)/self.width,float(y)/self.height))
-                print self.planner.nextSampleList
+                print(self.planner.nextSampleList)
             self.refresh()
 
     def idlefunc (self):
@@ -53,22 +69,45 @@ class PlanVisualizationProgram(GLProgram):
                 self.painted = False
                
     def keyboardfunc(self,key,x,y):
+        key = key.decode("utf-8") 
+        print("Key",key,"pressed at",x,y)
         if key==' ':
-            print "Planning 1..."
+            print("Planning 1...")
             self.planner.planMore(1)
             self.path = self.planner.getPath()
             self.G = self.planner.getRoadmap()
             self.planner.stats.pretty_print()
             self.refresh()
         elif key=='p':
-            print "Planning 1000..."
+            print("Planning 1000...")
             self.planner.planMore(1000)
             self.path = self.planner.getPath()
             self.G = self.planner.getRoadmap()
             self.planner.stats.pretty_print()
             self.refresh()
+        elif key=='o':
+            if self.path is not None:
+                costWeightInit = 0.1
+                xinit,uinit = self.path
+            else:
+                costWeightInit = 0.1
+                xinit,uinit,cost = self.planner.getBestPath(self.problem.objective + SetDistanceObjectiveFunction(self.problem.goal) + StepCountObjectiveFunction()*(-0.1))
+            print("Optimizing 10...")
+            objective = self.problem.objective
+            if isinstance(objective,PathLengthObjectiveFunction):
+                objective = EnergyObjectiveFunction()
+            if self.problem.controlSpace is None:
+                from .spaces.controlspace import ControlSpaceAdaptor
+                optimizer = iLQR(ControlSpaceAdaptor(self.problem.configurationSpace),objective,self.problem.goal,'log',costWeightInit)
+            else:
+                optimizer = iLQR(self.problem.controlSpace,objective,self.problem.goal,'log',costWeightInit)
+            converged,reason = optimizer.run(xinit,uinit,20)
+            print("Converged?",converged,"Termination reason",reason)
+            print("Endpoints",optimizer.xref[0],optimizer.xref[-1])
+            self.path = optimizer.xref,optimizer.uref
+            self.refresh()
         elif key=='r':
-            print "Resetting planner"
+            print("Resetting planner")
             self.planner.reset()
             self.path = None
             self.G = self.planner.getRoadmap()

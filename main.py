@@ -1,6 +1,10 @@
+from __future__ import print_function,division
+from six import iteritems
+
 from pomp.planners import allplanners
 from pomp.planners import test
 from pomp.example_problems import *
+from pomp.spaces.objectives import *
 import time
 import copy
 import sys
@@ -18,7 +22,7 @@ def mkdir_p(path):
 
 def testPlannerDefault(problem,problemName,maxTime,plannerType,**plannerParams):
     global numTrials
-    print "Planning with",plannerType,'on problem',problemName
+    print("Planning with",plannerType,'on problem',problemName)
     planner = problem.planner(plannerType,**plannerParams)
     folder = os.path.join("data",problemName)
     mkdir_p(folder)
@@ -35,7 +39,8 @@ all_problems = {'Kink':geometric.kinkTest(),
                 'Dubins2':dubins.dubinsTest2(),
                 'Flappy':flappy.flappyTest(),
                 'DoubleIntegrator':doubleintegrator.doubleIntegratorTest(),
-                'Pendulum':pendulum.pendulumTest()}
+                'Pendulum':pendulum.pendulumTest(),
+                'LQR':lqr.lqrTest()}
 
 defaultParameters = {'maxTime':30}
 customParameters = {'Kink':{'maxTime':40,'nextStateSamplingRange':0.15},
@@ -91,10 +96,10 @@ def runTests(problems = None,planners = None):
                 #p does not support differentially constrained problems
                 continue
             testPlannerDefault(pr,prname,maxTime,p,**params)
-            print "Finished test on problem",prname,"with planner",p
-            print "Parameters:"
-            for (k,v) in params.iteritems():
-                print " ",k,":",v
+            print("Finished test on problem",prname,"with planner",p)
+            print("Parameters:")
+            for (k,v) in iteritems(params):
+                print(" ",k,":",v)
     return
 
 def runViz(problem,planner):
@@ -103,10 +108,10 @@ def runViz(problem,planner):
     if 'maxTime' in params:
         del params['maxTime']
     
-    print "Planning on problem",problem,"with planner",planner
-    print "Parameters:"
-    for (k,v) in params.iteritems():
-        print " ",k,":",v
+    print("Planning on problem",problem,"with planner",planner)
+    print("Parameters:")
+    for (k,v) in iteritems(params):
+        print(" ",k,":",v)
     runVisualizer(all_problems[problem],type=planner,**params)
     
 if __name__=="__main__":
@@ -121,24 +126,24 @@ if __name__=="__main__":
     #runViz('Flappy','stable-sparse-rrt(selectionRadius=70,witnessRadius=35)')
 
     if len(sys.argv) < 3:
-        print "Usage: main.py [-v] Problem Planner1 ... Plannerk"
-        print
-        print "  Problem can be one of:"
-        print "   ",",\n    ".join(sorted(all_problems))
-        print "  or 'all' to test all problems."
-        print
-        print "  Planner can be one of:"
-        print "   ",",\n    ".join(sorted(all_planners))
-        print "  or 'all' to test all planners."
-        print
-        print "  If -v is provided, runs an OpenGL visualization of planning"
+        print("Usage: main.py [-v] Problem Planner1 ... Plannerk")
+        print()
+        print("  Problem can be one of:")
+        print("   ",",\n    ".join(sorted(all_problems)))
+        print("  or 'all' to test all problems.")
+        print()
+        print("  Planner can be one of:")
+        print("   ",",\n    ".join(sorted(all_planners)))
+        print("  or 'all' to test all planners.")
+        print()
+        print("  If -v is provided, runs an OpenGL visualization of planning")
         exit(0)
     if sys.argv[1] == '-v':
         from pomp.visualizer import runVisualizer
         #visualization mode
-        print "Testing visualization with problem",sys.argv[2],"and planner",sys.argv[3]
+        print("Testing visualization with problem",sys.argv[2],"and planner",sys.argv[3])
         runViz(sys.argv[2],sys.argv[3])
     else:
-        print
-        print "Testing problems",sys.argv[1],"with planners",sys.argv[2:]
+        print()
+        print("Testing problems",sys.argv[1],"with planners",sys.argv[2:])
         runTests(problems=[sys.argv[1]],planners=sys.argv[2:])

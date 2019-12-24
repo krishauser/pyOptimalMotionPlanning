@@ -202,7 +202,7 @@ class _VisualEditorBase:
         self.klamptwidgetmaster = WidgetSet()
         self.klamptwidgetdragging = False
         #refresh appearances for new OpenGL context
-        #for i in xrange(world.numIDs()):
+        #for i in range(world.numIDs()):
         #    world.appearance(i).refresh()
     def addWidget(self,widget):
         self.klamptwidgetmaster.add(widget)
@@ -297,11 +297,11 @@ class _ConfigVisualEditor(_VisualEditorBase):
     def display(self):
         #Override display handler since the widget draws the robot
         #the next few lines draw everything but the robot
-        for i in xrange(self.world.numTerrains()):
+        for i in range(self.world.numTerrains()):
             self.world.terrain(i).drawGL()
-        for i in xrange(self.world.numRigidObjects()):
+        for i in range(self.world.numRigidObjects()):
             self.world.rigidObject(i).drawGL()
-        for i in xrange(1,self.world.numRobots()):
+        for i in range(1,self.world.numRobots()):
             self.world.robot(i).drawGL()
         #this line will draw the robot
         self.klamptwidgetmaster.drawGL(self.viewport())

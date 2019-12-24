@@ -1,5 +1,5 @@
 from OpenGL.GL import *
-from geometric import *
+from .geometric import *
 from ..spaces.objective import *
 from ..spaces.statespace import *
 from ..spaces.configurationspace import *
@@ -84,9 +84,8 @@ class Flappy:
 
     def goalSet(self):
         r = self.goal_radius
-        return BoxSubset(self.configurationSpace(),
-                         [self.goal_state[0]-r,self.goal_state[1]-r,-self.max_velocity],
-                         [self.goal_state[0]+r,self.goal_state[1]+r,self.max_velocity])
+        return BoxSet([self.goal_state[0]-r,self.goal_state[1]-r,-self.max_velocity],
+                      [self.goal_state[0]+r,self.goal_state[1]+r,self.max_velocity])
 
 
 class FlappyObjectiveFunction(ObjectiveFunction):

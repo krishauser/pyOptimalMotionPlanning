@@ -1,9 +1,9 @@
 """This module defines a basic set of 3D cameras that can be controlled
 by a GUI."""
 
-import so3
-import se3
-import vectorops
+from . import so3
+from . import se3
+from . import vectorops
 
 basis_vectors = {'x':[1.0,0.0,0.0],
                  '-x':[-1.0,0.0,0.0],

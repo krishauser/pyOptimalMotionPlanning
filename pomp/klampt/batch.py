@@ -1,6 +1,6 @@
-from robotsim import *
+from .robotsim import *
 import time
-import map
+from . import map
 
 def getWorldSimState(world):
     """Returns a dict containing a copy of all variables that are
@@ -138,7 +138,7 @@ def batchSim(world,duration,initialConditions,returnItems,
         for (k,v) in initialConditions.iteritems():
             assert len(v)==len(v0),"initialConditions entries must all be of same length"
         print "klampt.batch.batchSim(): Running",len(v0),"simulations..."
-        for i in xrange(len(v0)):
+        for i in range(len(v0)):
             initCond = dict((k,v[i]) for (k,v) in initialConditions.iteritems())
             try:
                 simRes = doSim(world,duration,initCond,returnItems,trace=False,
@@ -177,7 +177,7 @@ def monteCarloSim(world,duration,initialConditionSamplers,N,returnItems,
     """
     print "klampt.batch.monteCarloSim(): Running",N,"simulations..."
     res = []
-    for sample in xrange(N):
+    for sample in range(N):
         initCond = dict((k,v()) for k,v in initialConditionSamplers.iteritems())
         try:
             simRes = doSim(world,duration,initCond,returnItems,trace=False,
@@ -231,7 +231,7 @@ def saveStateTrajectoryCSV(stateTraj,f):
     if len(stateTraj.items())==0:
         return
     length = len(stateTraj.values()[0])
-    for i in xrange(length):
+    for i in range(length):
         state0['iter'] = i
         for k in stateTraj.iterkeys():
             state0[k] = stateTraj[k][i]

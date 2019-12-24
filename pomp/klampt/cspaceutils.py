@@ -1,6 +1,10 @@
+from __future__ import print_function,division
+from six import iteritems
+from builtins import range
+
 import math
 import time
-from cspace import CSpace
+from .cspace import CSpace
 
 def default_sampleneighborhood(self,c,r):
     return [ci + random.uniform(-r,r) for ci in c]
@@ -98,7 +102,7 @@ class EmbeddedCSpace(CSpace):
     def __init__(self,ambientspace,xinit=None):
         self.ambientspace = ambientspace
         n = len(ambientspace.sample())
-        self.mapping = range(n)
+        self.mapping = list(range(n))
         #start at the zero config if no initial configuration is given
         if xinit==None:
             self.xinit = [0.0]*n

@@ -1,7 +1,7 @@
 from ..spaces.controlspace import *
-from ..spaces.configurationspace import NeighborhoodSubset
+from ..spaces.configurationspace import SingletonSubset,NeighborhoodSubset
 from ..spaces import metric
-import allplanners
+from . import allplanners
 
 class PlanningProblem:
     def __init__(self,space,

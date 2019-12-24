@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function,division
+from six import iteritems
 import sys
 import os
 import glob
@@ -8,7 +10,7 @@ import bisect
 from collections import defaultdict
 
 if len(sys.argv) < 2:
-    print "Usage: processresults.py folder [outfile]"
+    print("Usage: processresults.py folder [outfile]")
     exit(0)
 
 trialvarname = 'trial'
@@ -102,15 +104,15 @@ def parse_data(csvfn):
 def process(folder,outfile=None):
     csvfiles = glob.glob(os.path.join(folder,"*.csv"))
     data = dict()
-    print "Files in %s:"%(folder)
+    print("Files in %s:"%(folder))
     for fn in csvfiles:
         name = os.path.splitext(os.path.basename(fn))[0]
         if name == 'summary': continue
-        print "  "+name
+        print("  "+name)
         fdata = parse_data(fn)
         data[name] = fdata
     fn = (outfile if outfile is not None else os.path.join(folder,"summary.csv"))
-    print "Saving summary statistics to",fn
+    print("Saving summary statistics to",fn)
     with open(fn,'w') as f:
         headers = []
         for (name,fdata) in data.iteritems():
@@ -128,7 +130,7 @@ def process(folder,outfile=None):
             if len(item)==0: break
             writer.writerow(item)
             i+=1
-    print "Done."
+    print("Done.")
 
 if sys.argv[1] == 'all':
     files = glob.glob(os.path.join('data','*'))

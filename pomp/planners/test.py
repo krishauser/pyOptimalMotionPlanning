@@ -1,14 +1,18 @@
-from profiler import Profiler
+from __future__ import print_function,division
+from six import iteritems
+from builtins import range
+
+from .profiler import Profiler
 import time
 
 def testPlanner(planner,numTrials,maxTime,filename):    
-    print "Testing planner for %d trials, %f seconds"%(numTrials,maxTime)
-    print "Saving to",filename
+    print("Testing planner for %d trials, %f seconds"%(numTrials,maxTime))
+    print("Saving to",filename)
     f = open(filename,'w')
     f.write("trial,plan iters,plan time,best cost\n")
     for trial in range(numTrials):
-        print
-        print "Trial",trial+1
+        print()
+        print("Trial",trial+1)
         planner.reset()
         curCost = float('inf')
         t0 = time.time()
@@ -20,11 +24,13 @@ def testPlanner(planner,numTrials,maxTime,filename):
                 planner.planMore(10)
             except Exception as e:
                 if hadException:
-                    print "Warning, planner raise two exceptions in a row. Quitting"
+                    print("Warning, planner raise two exceptions in a row. Quitting")
                     break
                 else:
-                    print "Warning, planner raised an exception... soldiering on"
-                    print e
+                    import traceback
+                    traceback.print_exc()
+                    print("Warning, planner raised an exception... soldiering on")
+                    print(e)
                     hadException = True
                     continue
             iters += 10
@@ -38,9 +44,9 @@ def testPlanner(planner,numTrials,maxTime,filename):
             temp = Profiler()
             temp.items["Stats:"] = planner.stats
             temp.pretty_print()
-        print
-        print "Final cost:",curCost
-        print
+        print()
+        print("Final cost:",curCost)
+        print()
 
         f.write(str(trial)+","+str(iters)+","+str(maxTime)+","+str(curCost)+'\n')
     f.close()

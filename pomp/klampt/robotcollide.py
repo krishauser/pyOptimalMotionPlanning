@@ -51,7 +51,7 @@ class WorldCollider:
         self.rigidObjects = []
         self.robots = []
         
-        for i in xrange(world.numTerrains()):
+        for i in range(world.numTerrains()):
             t = world.terrain(i)
             g = t.geometry()
             if g != None:
@@ -59,7 +59,7 @@ class WorldCollider:
                 self.geomList.append((t,g))
             else:
                 self.terrains.append(-1)
-        for i in xrange(world.numRigidObjects()):
+        for i in range(world.numRigidObjects()):
             o = world.rigidObject(i)
             g = o.geometry()
             if g != None:
@@ -67,10 +67,10 @@ class WorldCollider:
                 self.geomList.append((o,g))
             else:
                 self.rigidObjects.append(-1)
-        for i in xrange(world.numRobots()):
+        for i in range(world.numRobots()):
             r = world.robot(i)
             self.robots.append([])
-            for j in xrange(r.numLinks()):
+            for j in range(r.numLinks()):
                 l = r.getLink(j)
                 g = l.geometry()
                 if g != None:
@@ -80,7 +80,7 @@ class WorldCollider:
                     self.robots[-1].append(-1)
 
         #construct the collision mask
-        for i in xrange(len(self.geomList)):
+        for i in range(len(self.geomList)):
             self.mask.append(set())
         for t in self.terrains:
             if t < 0: continue
@@ -120,8 +120,8 @@ class WorldCollider:
             #robot self-collision
             rob = self.geomList[r[0]][0].getRobot()
             nl = rob.numLinks()
-            for i in xrange(nl):
-                for j in xrange(i):
+            for i in range(nl):
+                for j in range(i):
                     if rob.selfCollisionEnabled(i,j):
                         self.mask[r[i]].add(r[j])
                         self.mask[r[j]].add(r[i])
@@ -202,12 +202,12 @@ class WorldCollider:
         only collisions for that robot are tested"""
         if isinstance(robot,RobotModel):
             try:
-                robot = [r for r in xrange(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
+                robot = [r for r in range(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
             except IndexError:
                 raise RuntimeError("Robot "+robot.getName()+" is not found in the world!")
         if robot == None:
             #test all robots
-            for r in xrange(len(self.robots)):
+            for r in range(len(self.robots)):
                 for c in self.robotSelfCollisions(r):
                     yield c
             return
@@ -226,17 +226,17 @@ class WorldCollider:
         are tested"""
         if isinstance(robot,RobotModel):
             try:
-                robot = [r for r in xrange(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
+                robot = [r for r in range(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
             except IndexError:
                 raise RuntimeError("Robot "+robot.getName()+" is not found in the world!")
         if isinstance(object,RigidObjectModel):
             try:
-                object = [o for o in xrange(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object.getID()][0]
+                object = [o for o in range(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object.getID()][0]
             except IndexError:
                 raise RuntimeError("RigidObject "+object.getName()+" is not found in the world!")
         if object == None:
             #test all objects
-            for o in xrange(len(self.rigidObjects)):
+            for o in range(len(self.rigidObjects)):
                 for c in self.robotObjectCollisions(robot,o):
                     yield c
             return
@@ -255,17 +255,17 @@ class WorldCollider:
         links and the terrain"""
         if isinstance(robot,RobotModel):
             try:
-                robot = [r for r in xrange(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
+                robot = [r for r in range(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
             except IndexError:
                 raise RuntimeError("Robot "+robot.getName()+" is not found in the world!")
         if isinstance(terrain,TerrainModel):
             try:
-                terrain = [t for t in xrange(self.world.numTerrains()) if self.world.terrain(t).getID()==terrain.getID()][0]
+                terrain = [t for t in range(self.world.numTerrains()) if self.world.terrain(t).getID()==terrain.getID()][0]
             except IndexError:
                 raise RuntimeError("Terrain "+robot.getName()+" is not found in the world!")
         if terrain == None:
             #test all terrains
-            for t in xrange(len(self.terrains)):
+            for t in range(len(self.terrains)):
                 for c in self.robotTerrainCollisions(robot,t):
                     yield c
             return
@@ -282,17 +282,17 @@ class WorldCollider:
     def objectTerrainCollisions(self,object,terrain=None):
         if isinstance(object,RigidObjectModel):
             try:
-                object = [o for o in xrange(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object.getID()][0]
+                object = [o for o in range(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object.getID()][0]
             except IndexError:
                 raise RuntimeError("RigidObject "+object.getName()+" is not found in the world!")
         if isinstance(terrain,TerrainModel):
             try:
-                terrain = [t for t in xrange(self.world.numTerrains()) if self.world.terrain(t).getID()==terrain.getID()][0]
+                terrain = [t for t in range(self.world.numTerrains()) if self.world.terrain(t).getID()==terrain.getID()][0]
             except IndexError:
                 raise RuntimeError("Terrain "+robot.getName()+" is not found in the world!")
         if terrain == None:
             #test all terrains
-            for t in xrange(len(self.terrains)):
+            for t in range(len(self.terrains)):
                 for c in self.objectTerrainCollisions(object,t):
                     yield c
             return
@@ -308,17 +308,17 @@ class WorldCollider:
     def objectObjectCollisions(self,object,object2):
         if isinstance(object,RigidObjectModel):
             try:
-                object = [o for o in xrange(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object.getID()][0]
+                object = [o for o in range(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object.getID()][0]
             except IndexError:
                 raise RuntimeError("RigidObject "+object.getName()+" is not found in the world!")
         if isinstance(object2,RigidObjectModel):
             try:
-                object2 = [o for o in xrange(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object2.getID()][0]
+                object2 = [o for o in range(self.world.numRigidObjects()) if self.world.rigidObject(o).getID()==object2.getID()][0]
             except IndexError:
                 raise RuntimeError("RigidObject "+object2.getName()+" is not found in the world!")
         if object2 == None:
             #test all terrains
-            for o in xrange(len(self.rigidObjects)):
+            for o in range(len(self.rigidObjects)):
                 for c in self.objectObjectCollisions(objectot):
                     yield c
             return
@@ -350,7 +350,7 @@ class WorldCollider:
         """Given robot index, do ray casting with the given ray"""
         if isinstance(robot,RobotModel):
             try:
-                robot = [r for r in xrange(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
+                robot = [r for r in range(self.world.numRobots()) if self.world.robot(r).getID()==robot.getID()][0]
             except IndexError:
                 raise RuntimeError("Robot "+robot.getName()+" is not found in the world!")
         rindices = self.robots[robot]
