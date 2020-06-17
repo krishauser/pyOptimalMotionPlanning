@@ -3,6 +3,7 @@ from .timespace import *
 from .interpolators import *
 from .sets import *
 from .biassets import TimeBiasSet
+import differences
 import numpy as np
 
 MAX_INTEGRATION_STEPS = 10000
@@ -33,7 +34,8 @@ class ControlSpace:
         
     def nextState_jacobian(self,x,u):
         """If you want to use numerical optimization methods, implement
-        this. Subclasses can use nextState_jacobian_diff to approximate
+        this. It should return a pair of matrices dx_n/dx, dx_n/du.
+        Subclasses can use nextState_jacobian_diff to approximate
         the Jacobian."""
         return self.nextState_jacobian_diff(x,u)
     
