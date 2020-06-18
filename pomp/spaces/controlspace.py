@@ -3,7 +3,7 @@ from .timespace import *
 from .interpolators import *
 from .sets import *
 from .biassets import TimeBiasSet
-import differences
+from . import differences
 import numpy as np
 
 MAX_INTEGRATION_STEPS = 10000
