@@ -16,7 +16,7 @@ def LinfMetric(a,b):
 class WeightedEuclideanMetric:
     def __init__(self,w):
         self.w = w
-    def __call__(a,b):
+    def __call__(self,a,b):
         if hasattr(self.w,'__iter__'):
             return math.sqrt(sum(w*(ai-bi)**2 for (w,ai,bi) in zip(self.w,a,b)))
         else:
@@ -25,5 +25,5 @@ class WeightedEuclideanMetric:
 class LpMetric:
     def __init__(self,p):
         self.p = p
-    def __call__(a,b):
+    def __call__(self,a,b):
         return pow(sum(pow(abs(ai-bi),p) for (w,ai,bi) in zip(self.w,a,b)),1.0/p)
